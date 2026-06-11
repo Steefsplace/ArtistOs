@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 
 export default function BookingPage({
   params,
 }: {
-  params: { artistSlug: string };
+  params: Promise<{ artistSlug: string }>;
 }) {
+  const { artistSlug } = use(params);
   const [form, setForm] = useState({
     promotor_name: "",
     promotor_email: "",
@@ -41,8 +42,7 @@ export default function BookingPage({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        // artist_id wordt later dynamisch via de slug opgezocht
-        artist_id: params.artistSlug,
+        artist_id: artistSlug,
       }),
     });
 
