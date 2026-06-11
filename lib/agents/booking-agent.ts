@@ -1,5 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -85,7 +92,7 @@ async function executeTool(
   toolInput: Record<string, unknown>,
   bookingId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = getSupabase();
 
   switch (toolName) {
     case "check_calendar_availability": {

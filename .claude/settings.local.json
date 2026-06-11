@@ -15,7 +15,8 @@
       "Bash(git push *)",
       "Bash(git config *)",
       "Bash(brew install *)",
-      "Bash(gh --version)"
+      "Bash(gh --version)",
+      "Bash(node -e ' *)"
     ]
   }
 }

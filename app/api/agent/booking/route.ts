@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { runBookingAgent } from "@/lib/agents/booking-agent";
+
+// Service role client — bypasses RLS for public booking inserts
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     // Save the booking request
     const { data: booking, error } = await supabase
@@ -57,7 +66,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Run the booking agent asynchronously
-    runBookingAgent(booking).catch(console.error);
+    runBookingAgent(booking)
+      .then(() => console.log("✅ Agent done for booking:", booking.id))
+      .catch((e) => console.error("❌ Agent error:", e.message, e.stack));
 
     return NextResponse.json({
       success: true,
@@ -71,7 +82,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { searchParams } = new URL(request.url);
   const artist_id = searchParams.get("artist_id");
 
