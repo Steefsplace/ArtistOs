@@ -88,6 +88,83 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* AI Team */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold">Jouw team</h2>
+          <span className="text-xs text-[var(--foreground)]/40">4 agents actief</span>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              name: "Marie",
+              role: "Booking Agent",
+              icon: "🎤",
+              color: "text-purple-400",
+              bg: "bg-purple-500/10",
+              description: "Beoordeelt aanvragen, onderhandelt fees en beschermt jouw belangen. Laat zich niet snel iets aanpraten.",
+              href: "/dashboard/bookings",
+              stat: "Boekingen",
+            },
+            {
+              name: "Fleur",
+              role: "Communicatie Agent",
+              icon: "✉️",
+              color: "text-blue-400",
+              bg: "bg-blue-500/10",
+              description: "Verwerkt inkomende berichten en schrijft responses in jouw stem. Warm, scherp en altijd menselijk.",
+              href: "/dashboard/messages",
+              stat: "Berichten",
+            },
+            {
+              name: "Luuk",
+              role: "Contract Agent",
+              icon: "📄",
+              color: "text-[var(--accent)]",
+              bg: "bg-[var(--accent-muted)]",
+              description: "Stelt waterdichte contracten op bij elke bevestigde boeking. Laat geen loopholes liggen.",
+              href: "/dashboard/contracts",
+              stat: "Contracten",
+            },
+            {
+              name: "William",
+              role: "Finance Agent",
+              icon: "💶",
+              color: "text-emerald-400",
+              bg: "bg-emerald-500/10",
+              description: "Genereert facturen, bewaakt betalingstermijnen en signaleert achterstallige posten.",
+              href: "/dashboard/finances",
+              stat: "Financiën",
+            },
+          ].map((agent) => (
+            <a
+              key={agent.name}
+              href={agent.href}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:bg-[var(--surface-2)] transition-colors group flex flex-col"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`h-10 w-10 rounded-full ${agent.bg} flex items-center justify-center text-lg`}>
+                  {agent.icon}
+                </div>
+                <span className="text-xs rounded-full px-2.5 py-1 bg-[var(--accent-muted)] text-[var(--accent)] font-medium">
+                  Actief
+                </span>
+              </div>
+              <p className={`font-bold text-base group-hover:${agent.color} transition-colors`}>
+                {agent.name}
+              </p>
+              <p className="text-xs text-[var(--foreground)]/40 mb-3">{agent.role}</p>
+              <p className="text-xs text-[var(--foreground)]/60 leading-relaxed flex-1">
+                {agent.description}
+              </p>
+              <p className={`text-xs font-medium mt-4 ${agent.color}`}>
+                {agent.stat} bekijken →
+              </p>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Quick actions */}
       <div>
         <h2 className="font-semibold mb-4">Snelle acties</h2>
