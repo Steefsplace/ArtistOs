@@ -92,7 +92,7 @@ export default function HomePage() {
         <div className="mt-10 flex flex-wrap gap-4 justify-center">
           <Link
             href="/auth/signup"
-            className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-8 text-sm font-semibold text-[#0c0c10] transition-opacity hover:opacity-90"
+            className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-8 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             Start gratis →
           </Link>
@@ -237,7 +237,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/auth/signup"
-            className="inline-flex h-14 items-center rounded-full bg-[var(--accent)] px-10 text-base font-semibold text-[#0c0c10] transition-opacity hover:opacity-90"
+            className="inline-flex h-14 items-center rounded-full bg-[var(--accent)] px-10 text-base font-semibold text-white transition-opacity hover:opacity-90"
           >
             Start gratis met ArtistOS →
           </Link>

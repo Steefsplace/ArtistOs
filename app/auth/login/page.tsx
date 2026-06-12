@@ -84,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 rounded-full bg-[var(--accent)] text-[#0c0c10] text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full h-11 rounded-full bg-[var(--accent)] text-white text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading ? "Inloggen…" : "Inloggen"}
             </button>

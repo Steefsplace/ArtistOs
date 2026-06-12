@@ -79,7 +79,7 @@ export default async function BookingsPage() {
           </p>
           <a
             href="/dashboard/settings"
-            className="inline-flex h-10 items-center rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-[#0c0c10]"
+            className="inline-flex h-10 items-center rounded-full bg-[var(--accent)] px-6 text-sm font-semibold text-white"
           >
             Profiel aanmaken →
           </a>

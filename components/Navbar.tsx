@@ -30,7 +30,7 @@ export default function Navbar() {
         </Link>
         <Link
           href="/auth/signup"
-          className="inline-flex h-9 items-center rounded-full bg-[var(--accent)] px-5 text-sm font-semibold text-[#0c0c10] transition-opacity hover:opacity-90"
+          className="inline-flex h-9 items-center rounded-full bg-[var(--accent)] px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
           Gratis starten
         </Link>
