@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { runContractAgent } from "./contract-agent";
 import { runFinanceAgent } from "./finance-agent";
+import { agentCommTools, executeAgentCommTool } from "./agent-comms";
 
 function getSupabase() {
   return createClient(
@@ -86,13 +87,15 @@ const tools: Anthropic.Tool[] = [
       required: ["booking_id", "content"],
     },
   },
+  ...agentCommTools,
 ];
 
 // Tool execution
 async function executeTool(
   toolName: string,
   toolInput: Record<string, unknown>,
-  bookingId: string
+  bookingId: string,
+  artistId: string
 ): Promise<string> {
   const supabase = getSupabase();
 
@@ -162,6 +165,9 @@ async function executeTool(
     }
 
     default:
+      if (toolName === "send_to_agent" || toolName === "read_agent_inbox") {
+        return executeAgentCommTool(toolName, toolInput, "marie", artistId);
+      }
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }
 }
@@ -188,11 +194,13 @@ Je bent scherp, zakelijk en beschermt altijd de belangen van de artiest. Je laat
 Je taak is om inkomende boekingsaanvragen te beoordelen en te verwerken.
 
 Je werkt snel, professioneel en in het belang van de artiest. Je:
-- Controleert altijd eerst de beschikbaarheid
+- Leest eerst je inbox (read_agent_inbox) voor context van collega-agents
+- Controleert altijd de beschikbaarheid
 - Haalt het artiestenprofiel op om de fee en fit te beoordelen
 - Maakt een eerlijk assessment: is dit een goede boeking?
 - Schrijft een professionele email response naar de promotor (in het Nederlands, tenzij de aanvraag in een andere taal is)
 - Laat interne notities achter voor de artiest
+- Stuurt relevante updates naar collega-agents via send_to_agent wanneer dat nuttig is
 
 Bij de fee beoordeling:
 - Onder minimum fee: altijd onderhandelen of afwijzen
@@ -246,7 +254,8 @@ Gebruik de beschikbare tools om dit te verwerken.`;
           const result = await executeTool(
             block.name,
             block.input as Record<string, unknown>,
-            booking.id
+            booking.id,
+            booking.artist_id
           );
           toolResults.push({
             type: "tool_result",

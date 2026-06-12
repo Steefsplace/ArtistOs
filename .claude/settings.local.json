@@ -16,7 +16,12 @@
       "Bash(git config *)",
       "Bash(brew install *)",
       "Bash(gh --version)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)",
+      "Bash(git commit -m 'add Luuk and William agents, update Toine personality *)",
+      "Bash(git commit -m 'rename comms agent Toine to Fleur *)",
+      "Bash(git commit -m 'add AI team overview to dashboard *)",
+      "Bash(git commit -m 'add inter-agent communication system with team feed dashboard *)"
     ]
   }
 }

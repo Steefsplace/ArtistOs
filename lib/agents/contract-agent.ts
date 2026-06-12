@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { agentCommTools, executeAgentCommTool } from "./agent-comms";
 
 function getSupabase() {
   return createClient(
@@ -54,11 +55,13 @@ const tools: Anthropic.Tool[] = [
       required: ["booking_id", "contract_id"],
     },
   },
+  ...agentCommTools,
 ];
 
 async function executeTool(
   toolName: string,
-  toolInput: Record<string, unknown>
+  toolInput: Record<string, unknown>,
+  artistId: string
 ): Promise<string> {
   const supabase = getSupabase();
 
@@ -104,15 +107,33 @@ async function executeTool(
     }
 
     default:
+      if (toolName === "send_to_agent" || toolName === "read_agent_inbox") {
+        return executeAgentCommTool(toolName, toolInput, "luuk", artistId);
+      }
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }
 }
 
 export interface ContractRequest {
   booking_id: string;
+  artist_id?: string;
 }
 
 export async function runContractAgent(req: ContractRequest) {
+  // Resolve artist_id if not provided
+  if (!req.artist_id) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data } = await supabase
+      .from("booking_requests")
+      .select("artist_id")
+      .eq("id", req.booking_id)
+      .single();
+    if (data) req.artist_id = data.artist_id;
+  }
+  const artistId = req.artist_id ?? "";
   const systemPrompt = `Je naam is Luuk en je bent de contract-agent van ArtistOS.
 Je bent precies, grondig en laat geen loopholes liggen. Je kent het entertainmentrecht en schrijft contracten die de artiest volledig beschermen. Je bent vriendelijk maar onverbiddelijk als het gaat om de kleine lettertjes.
 
@@ -132,12 +153,15 @@ Een goed contract bevat altijd:
 Schrijf het contract in het Nederlands tenzij de promotor duidelijk internationaal is.
 Gebruik formele maar heldere taal — geen juridisch jargon dat niemand begrijpt.
 
+Je werkt samen met Marie (booking), Fleur (communicatie) en William (finance). Stuur William een bericht zodra het contract klaar is zodat hij de factuur kan afstemmen op de contractbedragen. Stuur Fleur een bericht als de promotor gecontacteerd moet worden over ondertekening.
+
 Onderteken je communicatie altijd als: Luuk | Contracten — ArtistOS`;
 
   const userMessage = `Stel een contract op voor boeking ID: ${req.booking_id}
 
-Gebruik de tools om de boekingsdetails op te halen en genereer vervolgens een volledig contract.
-Sla het contract op in de database zodra het klaar is.`;
+Lees eerst je inbox (read_agent_inbox met artist_id van de boeking).
+Haal daarna de boekingsdetails op, genereer het contract en sla het op.
+Stuur tot slot een bericht naar William dat het contract klaar is.`;
 
   const messages: Anthropic.MessageParam[] = [
     { role: "user", content: userMessage },
@@ -163,7 +187,8 @@ Sla het contract op in de database zodra het klaar is.`;
         if (block.type === "tool_use") {
           const result = await executeTool(
             block.name,
-            block.input as Record<string, unknown>
+            block.input as Record<string, unknown>,
+            artistId
           );
           toolResults.push({
             type: "tool_result",

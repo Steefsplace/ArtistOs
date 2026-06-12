@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { agentCommTools, executeAgentCommTool } from "./agent-comms";
 
 function getSupabase() {
   return createClient(
@@ -106,11 +107,13 @@ const tools: Anthropic.Tool[] = [
       required: ["artist_id", "action"],
     },
   },
+  ...agentCommTools,
 ];
 
 async function executeTool(
   toolName: string,
-  toolInput: Record<string, unknown>
+  toolInput: Record<string, unknown>,
+  artistId: string
 ): Promise<string> {
   const supabase = getSupabase();
 
@@ -192,6 +195,9 @@ async function executeTool(
     }
 
     default:
+      if (toolName === "send_to_agent" || toolName === "read_agent_inbox") {
+        return executeAgentCommTool(toolName, toolInput, "william", artistId);
+      }
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }
 }
@@ -218,13 +224,18 @@ Bij het genereren van facturen:
 - Vermeld betalingstermijn duidelijk (14 dagen voor aanbetaling)
 - Maak de factuurstekst professioneel maar leesbaar
 
+Je werkt samen met Marie (booking), Fleur (communicatie) en Luuk (contracten). Lees altijd eerst je inbox. Stuur Fleur een bericht als een promotor herinnerd moet worden aan een betaling.
+
 Onderteken je communicatie altijd als: William | Finance — ArtistOS`;
+
+  const artistId = task.artist_id ?? "";
 
   let userMessage: string;
 
   if (task.type === "generate_invoice" && task.booking_id) {
     userMessage = `Genereer een factuur voor boeking ID: ${task.booking_id}
 
+Lees eerst je inbox (read_agent_inbox met artist_id: ${artistId}).
 Haal de boekingsdetails op en maak een aanbetaling-factuur aan (50% van de overeengekomen gage).
 Sla de factuur op in de database.`;
   } else if (task.type === "check_overdue" && task.artist_id) {
@@ -264,7 +275,8 @@ Haal alle facturen op en geef een samenvatting: totaal uitstaand, totaal betaald
         if (block.type === "tool_use") {
           const result = await executeTool(
             block.name,
-            block.input as Record<string, unknown>
+            block.input as Record<string, unknown>,
+            artistId
           );
           toolResults.push({
             type: "tool_result",

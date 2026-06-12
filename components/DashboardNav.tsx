@@ -8,9 +8,10 @@ import type { User } from "@supabase/supabase-js";
 const navItems = [
   { href: "/dashboard", label: "Overzicht", icon: "⊞" },
   { href: "/dashboard/bookings", label: "Boekingen", icon: "📅" },
-  { href: "/dashboard/finances", label: "Financiën", icon: "💶" },
-  { href: "/dashboard/contracts", label: "Contracten", icon: "📄" },
   { href: "/dashboard/messages", label: "Berichten", icon: "📬" },
+  { href: "/dashboard/contracts", label: "Contracten", icon: "📄" },
+  { href: "/dashboard/finances", label: "Financiën", icon: "💶" },
+  { href: "/dashboard/team", label: "Team feed", icon: "💬" },
   { href: "/dashboard/settings", label: "Instellingen", icon: "⚙" },
 ];
 

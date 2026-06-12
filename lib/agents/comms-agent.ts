@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { agentCommTools, executeAgentCommTool } from "./agent-comms";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -61,6 +62,7 @@ const tools: Anthropic.Tool[] = [
       required: ["message_id", "draft"],
     },
   },
+  ...agentCommTools,
 ];
 
 async function executeTool(
@@ -114,6 +116,9 @@ async function executeTool(
     }
 
     default:
+      if (toolName === "send_to_agent" || toolName === "read_agent_inbox") {
+        return executeAgentCommTool(toolName, toolInput, "fleur", toolInput.artist_id as string ?? "");
+      }
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }
 }
@@ -149,6 +154,8 @@ Types berichten die je verwerkt:
 
 Geef altijd interne notities mee zodat de artiest precies weet wat er speelt en wat er van hem/haar verwacht wordt.
 
+Je werkt samen met je collega-agents Marie (booking), Luuk (contracten) en William (finance). Lees bij elke taak eerst je inbox en stuur updates door als dat relevant is — bijvoorbeeld als een promotor vraagt naar contractstatus (→ Luuk) of betalingen (→ William).
+
 Onderteken je berichten altijd als: Fleur | Communicatie — ArtistOS`;
 
   const userMessage = `Verwerk dit inkomende bericht:
@@ -163,7 +170,7 @@ Message ID: ${message.id}
 Artist ID: ${message.artist_id}
 ${message.booking_request_id ? `Gekoppelde boeking: ${message.booking_request_id}` : "Geen boeking gekoppeld"}
 
-Gebruik de tools om context op te halen en schrijf een professionele response.`;
+Lees eerst je inbox (read_agent_inbox met artist_id: ${message.artist_id}), gebruik de tools om context op te halen en schrijf een professionele response.`;
 
   const messages: Anthropic.MessageParam[] = [
     { role: "user", content: userMessage },
