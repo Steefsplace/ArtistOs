@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { runContractAgent } from "./contract-agent";
+import { runFinanceAgent } from "./finance-agent";
 
 function getSupabase() {
   return createClient(
@@ -136,6 +138,17 @@ async function executeTool(
         })
         .eq("id", toolInput.booking_id as string);
 
+      // When a booking is confirmed, automatically trigger Luuk (contract) and William (invoice)
+      if (toolInput.status === "confirmed") {
+        const bookingId = toolInput.booking_id as string;
+        runContractAgent({ booking_id: bookingId })
+          .then(() => console.log("✅ Luuk: contract generated for", bookingId))
+          .catch((e) => console.error("❌ Luuk error:", e.message));
+        runFinanceAgent({ type: "generate_invoice", booking_id: bookingId })
+          .then(() => console.log("✅ William: invoice generated for", bookingId))
+          .catch((e) => console.error("❌ William error:", e.message));
+      }
+
       return JSON.stringify({ success: true });
     }
 
@@ -169,7 +182,9 @@ export interface BookingRequest {
 }
 
 export async function runBookingAgent(booking: BookingRequest) {
-  const systemPrompt = `Je bent een professionele booking agent voor een artiest.
+  const systemPrompt = `Je naam is Marie en je bent de booking agent van ArtistOS.
+Je bent scherp, zakelijk en beschermt altijd de belangen van de artiest. Je laat je niet snel iets aanpraten en weet precies wat een optreden waard is.
+
 Je taak is om inkomende boekingsaanvragen te beoordelen en te verwerken.
 
 Je werkt snel, professioneel en in het belang van de artiest. Je:
@@ -184,7 +199,7 @@ Bij de fee beoordeling:
 - Rond de base fee: accepteren als venue/datum goed is
 - Boven base fee: altijd accepteren
 
-Wees vriendelijk maar zakelijk in communicatie met promotors.`;
+Onderteken je emails altijd als: Marie | Booking — ArtistOS`;
 
   const userMessage = `Verwerk deze boekingsaanvraag:
 
