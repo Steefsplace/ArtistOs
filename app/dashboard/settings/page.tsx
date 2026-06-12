@@ -17,6 +17,7 @@ export default function SettingsPage() {
     minimum_fee: "",
     city: "",
     website: "",
+    fee_type: "negotiable" as "fixed" | "negotiable",
   });
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function SettingsPage() {
           minimum_fee: artist.minimum_fee?.toString() ?? "",
           city: artist.city ?? "",
           website: artist.website ?? "",
+          fee_type: (artist.fee_type ?? "negotiable") as "fixed" | "negotiable",
         });
       }
       setLoading(false);
@@ -81,6 +83,7 @@ export default function SettingsPage() {
       minimum_fee: form.minimum_fee ? parseFloat(form.minimum_fee) : null,
       city: form.city,
       website: form.website,
+      fee_type: form.fee_type,
       updated_at: new Date().toISOString(),
     };
 
@@ -147,12 +150,56 @@ export default function SettingsPage() {
           <h2 className="font-semibold text-sm uppercase tracking-widest text-[var(--foreground)]/40">
             Fees — alleen zichtbaar voor de agents
           </h2>
+          {/* Fee type toggle */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setForm((p) => ({ ...p, fee_type: "negotiable" }))}
+              className={`rounded-xl border p-4 text-left transition-colors ${
+                form.fee_type === "negotiable"
+                  ? "border-[var(--accent)] bg-[var(--accent-muted)]"
+                  : "border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--accent)]/40"
+              }`}
+            >
+              <p className={`text-sm font-semibold mb-1 ${form.fee_type === "negotiable" ? "text-[var(--accent)]" : ""}`}>
+                Onderhandelbaar
+              </p>
+              <p className="text-xs text-[var(--foreground)]/50 leading-relaxed">
+                Marie onderhandelt actief. Minimum fee is de ondergrens.
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm((p) => ({ ...p, fee_type: "fixed" }))}
+              className={`rounded-xl border p-4 text-left transition-colors ${
+                form.fee_type === "fixed"
+                  ? "border-[var(--accent)] bg-[var(--accent-muted)]"
+                  : "border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--accent)]/40"
+              }`}
+            >
+              <p className={`text-sm font-semibold mb-1 ${form.fee_type === "fixed" ? "text-[var(--accent)]" : ""}`}>
+                Vaste prijs
+              </p>
+              <p className="text-xs text-[var(--foreground)]/50 leading-relaxed">
+                Marie communiceert één prijs. Take it or leave it.
+              </p>
+            </button>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Standaard fee (€)" name="base_fee" type="number" value={form.base_fee} onChange={handleChange} placeholder="2500" />
-            <Field label="Minimum fee (€)" name="minimum_fee" type="number" value={form.minimum_fee} onChange={handleChange} placeholder="1500" />
+            <Field
+              label={form.fee_type === "fixed" ? "Vaste fee (€)" : "Standaard fee (€)"}
+              name="base_fee" type="number" value={form.base_fee}
+              onChange={handleChange} placeholder="2500"
+            />
+            {form.fee_type === "negotiable" && (
+              <Field label="Minimum fee (€)" name="minimum_fee" type="number" value={form.minimum_fee} onChange={handleChange} placeholder="1500" />
+            )}
           </div>
           <p className="text-xs text-[var(--foreground)]/40">
-            Marie gebruikt deze bedragen om boekingsaanvragen te beoordelen en te onderhandelen.
+            {form.fee_type === "fixed"
+              ? "Marie communiceert deze prijs als niet-onderhandelbaar naar promotors."
+              : "Marie gebruikt deze bedragen om boekingsaanvragen te beoordelen en te onderhandelen."}
           </p>
         </div>
 
