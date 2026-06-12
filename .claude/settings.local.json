@@ -23,7 +23,8 @@
       "Bash(git commit -m 'add AI team overview to dashboard *)",
       "Bash(git commit -m 'add inter-agent communication system with team feed dashboard *)",
       "Bash(git commit -m 'add settings page with artist profile and fee configuration *)",
-      "Bash(git commit -m 'add fixed/negotiable fee toggle for artists and Marie respects it *)"
+      "Bash(git commit -m 'add fixed/negotiable fee toggle for artists and Marie respects it *)",
+      "Bash(git commit -m 'add multilingual support: NL/EN/DE/FR/ES/AR with RTL for Arabic *)"
     ]
   }
 }

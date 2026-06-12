@@ -4,20 +4,24 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { useLocale } from "@/lib/i18n/LocaleContext";
+import { type TranslationKey } from "@/lib/i18n/translations";
+import LanguageSwitcher from "./LanguageSwitcher";
 
-const navItems = [
-  { href: "/dashboard", label: "Overzicht", icon: "⊞" },
-  { href: "/dashboard/bookings", label: "Boekingen", icon: "📅" },
-  { href: "/dashboard/messages", label: "Berichten", icon: "📬" },
-  { href: "/dashboard/contracts", label: "Contracten", icon: "📄" },
-  { href: "/dashboard/finances", label: "Financiën", icon: "💶" },
-  { href: "/dashboard/team", label: "Team feed", icon: "💬" },
-  { href: "/dashboard/settings", label: "Instellingen", icon: "⚙" },
+const navItems: { href: string; key: TranslationKey; icon: string }[] = [
+  { href: "/dashboard",           key: "nav_overview",  icon: "⊞" },
+  { href: "/dashboard/bookings",  key: "nav_bookings",  icon: "📅" },
+  { href: "/dashboard/messages",  key: "nav_messages",  icon: "📬" },
+  { href: "/dashboard/contracts", key: "nav_contracts", icon: "📄" },
+  { href: "/dashboard/finances",  key: "nav_finances",  icon: "💶" },
+  { href: "/dashboard/team",      key: "nav_team",      icon: "💬" },
+  { href: "/dashboard/settings",  key: "nav_settings",  icon: "⚙" },
 ];
 
 export default function DashboardNav({ user }: { user: User }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { tr } = useLocale();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -53,7 +57,7 @@ export default function DashboardNav({ user }: { user: User }) {
               }`}
             >
               <span className="text-base leading-none">{item.icon}</span>
-              {item.label}
+              {tr(item.key)}
             </Link>
           );
         })}
@@ -70,11 +74,12 @@ export default function DashboardNav({ user }: { user: User }) {
             <p className="text-xs text-[var(--foreground)]/40 truncate">{user.email}</p>
           </div>
         </div>
+        <LanguageSwitcher />
         <button
           onClick={handleLogout}
           className="w-full text-left px-3 py-2 text-xs text-[var(--foreground)]/40 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/5"
         >
-          Uitloggen
+          {tr("nav_logout")}
         </button>
       </div>
     </aside>
